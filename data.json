@@ -1,0 +1,22 @@
+{
+  "inventory": [
+    {
+      "id": 1,
+      "name": "Panadol",
+      "price": 5000.0,
+      "quantity": 90
+    },
+    {
+      "id": 2,
+      "name": "TestMed",
+      "price": 1000.0,
+      "quantity": 50
+    },
+    {
+      "id": 3,
+      "name": "ThuocVn",
+      "price": 5000.5,
+      "quantity": 20
+    }
+  ]
+}
