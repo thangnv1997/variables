@@ -49,6 +49,15 @@ impl Pharmacy {
         }
     }
 
+    pub fn delete_medicine(&mut self, id: u32) -> Result<(), String> {
+        if let Some(pos) = self.inventory.iter().position(|m| m.id == id) {
+            self.inventory.remove(pos);
+            Ok(())
+        } else {
+            Err("Medicine not found".to_string())
+        }
+    }
+
     pub fn list_medicines(&self) {
         println!(
             "{:<5} | {:<20} | {:<15} | {:<10}",

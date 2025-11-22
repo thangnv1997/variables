@@ -14,7 +14,8 @@ fn main() {
         println!("1. Add Medicine");
         println!("2. List Medicines");
         println!("3. Sell Medicine");
-        println!("4. Save & Exit");
+        println!("4. Delete Medicine");
+        println!("5. Save & Exit");
         print!("Choose an option: ");
         io::stdout().flush().unwrap();
 
@@ -47,6 +48,13 @@ fn main() {
                 }
             }
             "4" => {
+                let id = read_positive_u32("Enter medicine ID to delete: ");
+                match pharmacy.delete_medicine(id) {
+                    Ok(_) => println!("Medicine deleted successfully!"),
+                    Err(e) => println!("Error: {}", e),
+                }
+            }
+            "5" => {
                 save_data(&pharmacy);
                 println!("Data saved. Goodbye!");
                 break;
