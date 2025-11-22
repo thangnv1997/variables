@@ -48,10 +48,21 @@ fn main() {
                 }
             }
             "4" => {
-                let id = read_positive_u32("Enter medicine ID to delete: ");
-                match pharmacy.delete_medicine(id) {
-                    Ok(_) => println!("Medicine deleted successfully!"),
-                    Err(e) => println!("Error: {}", e),
+                let input = prompt("Enter medicine IDs to delete (separated by space or comma): ");
+                let ids: Vec<u32> = input
+                    .split(|c| c == ' ' || c == ',')
+                    .filter_map(|s| s.trim().parse().ok())
+                    .collect();
+
+                if ids.is_empty() {
+                    println!("No valid IDs entered.");
+                } else {
+                    for id in ids {
+                        match pharmacy.delete_medicine(id) {
+                            Ok(_) => println!("Medicine ID {} deleted successfully!", id),
+                            Err(e) => println!("Failed to delete ID {}: {}", id, e),
+                        }
+                    }
                 }
             }
             "5" => {
