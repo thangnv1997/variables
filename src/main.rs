@@ -57,11 +57,17 @@ fn main() {
                 if ids.is_empty() {
                     println!("No valid IDs entered.");
                 } else {
-                    for id in ids {
-                        match pharmacy.delete_medicine(id) {
-                            Ok(_) => println!("Medicine ID {} deleted successfully!", id),
-                            Err(e) => println!("Failed to delete ID {}: {}", id, e),
+                    let confirm =
+                        prompt("Are you sure you want to delete these medicines? (y/N): ");
+                    if confirm.trim().eq_ignore_ascii_case("y") {
+                        for id in ids {
+                            match pharmacy.delete_medicine(id) {
+                                Ok(_) => println!("Medicine ID {} deleted successfully!", id),
+                                Err(e) => println!("Failed to delete ID {}: {}", id, e),
+                            }
                         }
+                    } else {
+                        println!("Deletion cancelled.");
                     }
                 }
             }
