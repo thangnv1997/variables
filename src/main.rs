@@ -6,9 +6,13 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::{Html, IntoResponse},
-    routing::{delete, get, post},
+    routing::{delete, get, post, put},
 };
-use models::{ExportBatch, ImportBatch, Medicine, Pharmacy};
+use chrono::{DateTime, Local};
+use models::{
+    ExportBatch, ImportBatch, InternalTransfer, Medicine, Pharmacy, StockBatch, Warehouse,
+    WarehouseType,
+};
 use serde::Deserialize;
 use std::{
     fs,
@@ -34,6 +38,17 @@ async fn main() {
         .route("/api/sell", post(sell_medicine))
         .route("/api/batches/import", get(get_import_batches))
         .route("/api/batches/export", get(get_export_batches))
+        // Warehouse routes
+        .route(
+            "/api/warehouses",
+            get(list_warehouses).post(create_warehouse),
+        )
+        .route("/api/warehouses/:id", put(edit_warehouse))
+        .route("/api/stock-batches", get(list_stock_batches))
+        .route("/api/import-batch", post(import_batch_handler))
+        .route("/api/transfer-batch", post(transfer_batch_handler))
+        .route("/api/expiring-batches", get(get_expiring_batches))
+        .route("/api/transfers", get(get_transfers))
         .nest_service("/assets", ServeDir::new("assets"))
         .route("/", get(index_handler))
         .with_state(state.clone());
@@ -115,6 +130,125 @@ async fn get_import_batches(State(state): State<AppState>) -> Json<Vec<ImportBat
 async fn get_export_batches(State(state): State<AppState>) -> Json<Vec<ExportBatch>> {
     let pharmacy = state.lock().unwrap();
     Json(pharmacy.export_log.clone())
+}
+
+// Warehouse handlers
+
+async fn list_warehouses(State(state): State<AppState>) -> Json<Vec<Warehouse>> {
+    let pharmacy = state.lock().unwrap();
+    Json(pharmacy.warehouses.clone())
+}
+
+#[derive(Deserialize)]
+struct CreateWarehouseRequest {
+    name: String,
+    warehouse_type: WarehouseType,
+}
+
+#[derive(Deserialize)]
+struct EditWarehouseRequest {
+    name: String,
+    warehouse_type: WarehouseType,
+}
+
+async fn create_warehouse(
+    State(state): State<AppState>,
+    Json(payload): Json<CreateWarehouseRequest>,
+) -> impl IntoResponse {
+    let mut pharmacy = state.lock().unwrap();
+    let id = pharmacy.add_warehouse(payload.name, payload.warehouse_type);
+    save_data(&pharmacy);
+    (StatusCode::CREATED, Json(id))
+}
+
+async fn edit_warehouse(
+    State(state): State<AppState>,
+    Path(id): Path<u32>,
+    Json(payload): Json<EditWarehouseRequest>,
+) -> impl IntoResponse {
+    let mut pharmacy = state.lock().unwrap();
+    match pharmacy.edit_warehouse(id, payload.name, payload.warehouse_type) {
+        Ok(_) => {
+            save_data(&pharmacy);
+            StatusCode::OK.into_response()
+        }
+        Err(e) => (StatusCode::BAD_REQUEST, e).into_response(),
+    }
+}
+
+async fn list_stock_batches(State(state): State<AppState>) -> Json<Vec<StockBatch>> {
+    let pharmacy = state.lock().unwrap();
+    Json(pharmacy.stock_batches.clone())
+}
+
+#[derive(Deserialize)]
+struct ImportBatchRequest {
+    medicine_id: u32,
+    medicine_name: String,
+    warehouse_id: u32,
+    quantity: u32,
+    price: f64,
+    expiry_date: String, // ISO 8601 format
+}
+
+async fn import_batch_handler(
+    State(state): State<AppState>,
+    Json(payload): Json<ImportBatchRequest>,
+) -> impl IntoResponse {
+    let mut pharmacy = state.lock().unwrap();
+
+    // Parse expiry date
+    let expiry_date = match DateTime::parse_from_rfc3339(&payload.expiry_date) {
+        Ok(dt) => dt.with_timezone(&Local),
+        Err(_) => return (StatusCode::BAD_REQUEST, "Invalid date format").into_response(),
+    };
+
+    match pharmacy.import_batch(
+        payload.medicine_id,
+        payload.medicine_name,
+        payload.warehouse_id,
+        payload.quantity,
+        payload.price,
+        expiry_date,
+    ) {
+        Ok(batch_id) => {
+            save_data(&pharmacy);
+            (StatusCode::CREATED, Json(batch_id)).into_response()
+        }
+        Err(e) => (StatusCode::BAD_REQUEST, e).into_response(),
+    }
+}
+
+#[derive(Deserialize)]
+struct TransferBatchRequest {
+    batch_id: u32,
+    to_warehouse_id: u32,
+    quantity: u32,
+}
+
+async fn transfer_batch_handler(
+    State(state): State<AppState>,
+    Json(payload): Json<TransferBatchRequest>,
+) -> impl IntoResponse {
+    let mut pharmacy = state.lock().unwrap();
+
+    match pharmacy.transfer_batch(payload.batch_id, payload.to_warehouse_id, payload.quantity) {
+        Ok(_) => {
+            save_data(&pharmacy);
+            StatusCode::OK.into_response()
+        }
+        Err(e) => (StatusCode::BAD_REQUEST, e).into_response(),
+    }
+}
+
+async fn get_expiring_batches(State(state): State<AppState>) -> Json<Vec<StockBatch>> {
+    let pharmacy = state.lock().unwrap();
+    Json(pharmacy.get_expiring_batches(90))
+}
+
+async fn get_transfers(State(state): State<AppState>) -> Json<Vec<InternalTransfer>> {
+    let pharmacy = state.lock().unwrap();
+    Json(pharmacy.transfer_log.clone())
 }
 
 fn load_data() -> Pharmacy {

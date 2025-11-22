@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pharmacy Management System</title>
+    <title>Pharmacy Warehouse Management</title>
     <link rel="stylesheet" href="/assets/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -12,111 +12,241 @@
 <body>
     <div class="container">
         <header>
-            <h1>Pharmacy Manager</h1>
-            <p>Efficiently manage your inventory</p>
+            <h1>🏥 Pharmacy Warehouse Manager</h1>
+            <p>Multi-warehouse inventory with FEFO and expiry tracking</p>
         </header>
 
         <main>
+            <!-- Main Navigation Tabs -->
             <section class="card">
-                <h2>Add Medicine</h2>
-                <form id="addForm">
-                    <div class="form-group">
-                        <label for="name">Name</label>
-                        <input type="text" id="name" required placeholder="e.g., Panadol">
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="price">Price (VND)</label>
-                            <input type="number" id="price" step="0.01" required placeholder="5000">
-                        </div>
-                        <div class="form-group">
-                            <label for="quantity">Quantity</label>
-                            <input type="number" id="quantity" required placeholder="100">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-primary">Add Medicine</button>
-                </form>
-            </section>
-
-            <section class="card">
-                <div class="tabs">
-                    <button class="tab-btn active" data-tab="inventory">Inventory</button>
-                    <button class="tab-btn" data-tab="import">Import History</button>
-                    <button class="tab-btn" data-tab="export">Export History</button>
+                <div class="tabs main-tabs">
+                    <button class="tab-btn active" data-tab="warehouses">Warehouses</button>
+                    <button class="tab-btn" data-tab="stock">Stock Batches</button>
+                    <button class="tab-btn" data-tab="transfers">Internal Transfers</button>
+                    <button class="tab-btn" data-tab="expiring">⚠️ Expiring Soon</button>
+                    <button class="tab-btn" data-tab="history">History</button>
                 </div>
 
-                <div id="inventory" class="tab-content active">
+                <!-- Warehouses Tab -->
+                <div id="warehouses" class="tab-content active">
+                    <div class="section-header">
+                        <h3>Warehouse Management</h3>
+                        <button class="btn-primary btn-sm" onclick="openCreateWarehouseModal()">+ Create
+                            Warehouse</button>
+                    </div>
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
                                     <th>ID</th>
                                     <th>Name</th>
-                                    <th>Price</th>
+                                    <th>Type</th>
+                                    <th>Total Batches</th>
+                                </tr>
+                            </thead>
+                            <tbody id="warehouseList"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Stock Batches Tab -->
+                <div id="stock" class="tab-content">
+                    <div class="section-header">
+                        <h3>Stock Batches</h3>
+                        <button class="btn-primary btn-sm" onclick="openImportBatchModal()">+ Import Batch</button>
+                    </div>
+                    <div class="filter-group">
+                        <label>Filter by Warehouse:</label>
+                        <select id="warehouseFilter" onchange="filterStockByWarehouse()">
+                            <option value="">All Warehouses</option>
+                        </select>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Batch ID</th>
+                                    <th>Medicine</th>
+                                    <th>Warehouse</th>
                                     <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Expiry Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="medicineList">
-                                <!-- Medicines will be loaded here -->
-                            </tbody>
+                            <tbody id="stockBatchList"></tbody>
                         </table>
                     </div>
                 </div>
 
-                <div id="import" class="tab-content">
+                <!-- Internal Transfers Tab -->
+                <div id="transfers" class="tab-content">
+                    <div class="section-header">
+                        <h3>Internal Transfers</h3>
+                        <button class="btn-primary btn-sm" onclick="openTransferModal()">+ Transfer Batch</button>
+                    </div>
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Batch ID</th>
+                                    <th>Transfer ID</th>
                                     <th>Medicine</th>
+                                    <th>From</th>
+                                    <th>To</th>
                                     <th>Quantity</th>
-                                    <th>Price</th>
-                                    <th>Time</th>
+                                    <th>Date</th>
                                 </tr>
                             </thead>
-                            <tbody id="importList">
-                                <!-- Import batches will be loaded here -->
-                            </tbody>
+                            <tbody id="transferList"></tbody>
                         </table>
                     </div>
                 </div>
 
-                <div id="export" class="tab-content">
+                <!-- Expiring Soon Tab -->
+                <div id="expiring" class="tab-content">
+                    <div class="alert alert-warning">
+                        <strong>⚠️ Warning:</strong> The following batches will expire within 90 days
+                    </div>
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Batch ID</th>
                                     <th>Medicine</th>
-                                    <th>Amount</th>
-                                    <th>Price</th>
-                                    <th>Time</th>
+                                    <th>Warehouse</th>
+                                    <th>Quantity</th>
+                                    <th>Expiry Date</th>
+                                    <th>Days Left</th>
                                 </tr>
                             </thead>
-                            <tbody id="exportList">
-                                <!-- Export batches will be loaded here -->
-                            </tbody>
+                            <tbody id="expiringList"></tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- History Tab -->
+                <div id="history" class="tab-content">
+                    <div class="tabs sub-tabs">
+                        <button class="tab-btn active" data-tab="import-history">Import</button>
+                        <button class="tab-btn" data-tab="export-history">Export</button>
+                    </div>
+
+                    <div id="import-history" class="tab-content active">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Medicine</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="importList"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="export-history" class="tab-content">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Medicine</th>
+                                        <th>Amount</th>
+                                        <th>Price</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="exportList"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- Sell Modal -->
-    <div id="sellModal" class="modal">
+    <!-- Create Warehouse Modal -->
+    <div id="createWarehouseModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Sell Medicine</h2>
-            <form id="sellForm">
-                <input type="hidden" id="sellId">
+            <span class="close" onclick="closeModal('createWarehouseModal')">&times;</span>
+            <h2>Create Warehouse</h2>
+            <form id="createWarehouseForm">
                 <div class="form-group">
-                    <label for="sellAmount">Amount</label>
-                    <input type="number" id="sellAmount" required min="1">
+                    <label for="warehouseName">Warehouse Name</label>
+                    <input type="text" id="warehouseName" required placeholder="e.g., Main Warehouse">
                 </div>
-                <button type="submit" class="btn-primary">Confirm Sale</button>
+                <div class="form-group">
+                    <label for="warehouseType">Type</label>
+                    <select id="warehouseType" required>
+                        <option value="Main">Main Warehouse (Kho Chính)</option>
+                        <option value="Store">Pharmacy Store (Kho Nhà Thuốc)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Create</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Import Batch Modal -->
+    <div id="importBatchModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('importBatchModal')">&times;</span>
+            <h2>Import Batch</h2>
+            <form id="importBatchForm">
+                <div class="form-group">
+                    <label for="importMedicineId">Medicine ID</label>
+                    <input type="number" id="importMedicineId" required>
+                </div>
+                <div class="form-group">
+                    <label for="importMedicineName">Medicine Name</label>
+                    <input type="text" id="importMedicineName" required>
+                </div>
+                <div class="form-group">
+                    <label for="importWarehouse">Warehouse</label>
+                    <select id="importWarehouse" required></select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="importQuantity">Quantity</label>
+                        <input type="number" id="importQuantity" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="importPrice">Price (VND)</label>
+                        <input type="number" id="importPrice" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="importExpiryDate">Expiry Date</label>
+                    <input type="date" id="importExpiryDate" required>
+                </div>
+                <button type="submit" class="btn-primary">Import</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Transfer Batch Modal -->
+    <div id="transferModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('transferModal')">&times;</span>
+            <h2>Transfer Batch</h2>
+            <form id="transferForm">
+                <div class="form-group">
+                    <label for="transferBatchId">Batch ID</label>
+                    <input type="number" id="transferBatchId" required>
+                </div>
+                <div class="form-group">
+                    <label for="transferToWarehouse">To Warehouse</label>
+                    <select id="transferToWarehouse" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="transferQuantity">Quantity</label>
+                    <input type="number" id="transferQuantity" required min="1">
+                </div>
+                <button type="submit" class="btn-primary">Transfer</button>
             </form>
         </div>
     </div>
