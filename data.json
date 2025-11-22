@@ -2,15 +2,45 @@
   "inventory": [
     {
       "id": 1,
-      "name": "hapacol",
-      "price": 5000.0,
-      "quantity": 90
+      "name": "paradol",
+      "price": 500.0,
+      "quantity": 994
+    }
+  ],
+  "import_log": [
+    {
+      "id": 1,
+      "medicine_id": 1,
+      "medicine_name": "paradol",
+      "quantity": 1000,
+      "price": 500.0,
+      "timestamp": "2025-11-23T00:39:26.877195717+07:00"
+    }
+  ],
+  "export_log": [
+    {
+      "id": 1,
+      "medicine_id": 1,
+      "medicine_name": "paradol",
+      "amount": 1,
+      "price": 500.0,
+      "timestamp": "2025-11-23T00:39:36.297156623+07:00"
     },
     {
       "id": 2,
-      "name": "paradol",
-      "price": 4500.0,
-      "quantity": 10
+      "medicine_id": 1,
+      "medicine_name": "paradol",
+      "amount": 2,
+      "price": 500.0,
+      "timestamp": "2025-11-23T00:39:42.929615605+07:00"
+    },
+    {
+      "id": 3,
+      "medicine_id": 1,
+      "medicine_name": "paradol",
+      "amount": 3,
+      "price": 500.0,
+      "timestamp": "2025-11-23T00:39:45.446086059+07:00"
     }
   ]
 }

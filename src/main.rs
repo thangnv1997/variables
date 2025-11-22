@@ -8,7 +8,7 @@ use axum::{
     response::{Html, IntoResponse},
     routing::{delete, get, post},
 };
-use models::{Medicine, Pharmacy};
+use models::{ExportBatch, ImportBatch, Medicine, Pharmacy};
 use serde::Deserialize;
 use std::{
     fs,
@@ -32,6 +32,8 @@ async fn main() {
         .route("/api/medicines", get(list_medicines).post(add_medicine))
         .route("/api/medicines/{id}", delete(delete_medicine))
         .route("/api/sell", post(sell_medicine))
+        .route("/api/batches/import", get(get_import_batches))
+        .route("/api/batches/export", get(get_export_batches))
         .nest_service("/assets", ServeDir::new("assets"))
         .route("/", get(index_handler))
         .with_state(state.clone());
@@ -103,6 +105,16 @@ async fn sell_medicine(
         }
         Err(e) => (StatusCode::BAD_REQUEST, e).into_response(),
     }
+}
+
+async fn get_import_batches(State(state): State<AppState>) -> Json<Vec<ImportBatch>> {
+    let pharmacy = state.lock().unwrap();
+    Json(pharmacy.import_log.clone())
+}
+
+async fn get_export_batches(State(state): State<AppState>) -> Json<Vec<ExportBatch>> {
+    let pharmacy = state.lock().unwrap();
+    Json(pharmacy.export_log.clone())
 }
 
 fn load_data() -> Pharmacy {
