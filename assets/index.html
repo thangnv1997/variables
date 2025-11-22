@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacy Management System</title>
+    <link rel="stylesheet" href="/assets/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Pharmacy Manager</h1>
+            <p>Efficiently manage your inventory</p>
+        </header>
+
+        <main>
+            <section class="card">
+                <h2>Add Medicine</h2>
+                <form id="addForm">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" required placeholder="e.g., Panadol">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="price">Price (VND)</label>
+                            <input type="number" id="price" step="0.01" required placeholder="5000">
+                        </div>
+                        <div class="form-group">
+                            <label for="quantity">Quantity</label>
+                            <input type="number" id="quantity" required placeholder="100">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">Add Medicine</button>
+                </form>
+            </section>
+
+            <section class="card">
+                <h2>Inventory</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="medicineList">
+                            <!-- Medicines will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Sell Modal -->
+    <div id="sellModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Sell Medicine</h2>
+            <form id="sellForm">
+                <input type="hidden" id="sellId">
+                <div class="form-group">
+                    <label for="sellAmount">Amount</label>
+                    <input type="number" id="sellAmount" required min="1">
+                </div>
+                <button type="submit" class="btn-primary">Confirm Sale</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/assets/script.js"></script>
+</body>
+</html>

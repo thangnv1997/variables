@@ -2,9 +2,15 @@
   "inventory": [
     {
       "id": 1,
-      "name": "Panadol",
+      "name": "hapacol",
       "price": 5000.0,
       "quantity": 90
+    },
+    {
+      "id": 2,
+      "name": "paradol",
+      "price": 4500.0,
+      "quantity": 10
     }
   ]
 }

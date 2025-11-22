@@ -8,7 +8,7 @@ pub struct Medicine {
     pub quantity: u32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Pharmacy {
     pub inventory: Vec<Medicine>,
 }
