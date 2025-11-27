@@ -1,11 +1,13 @@
 const API_URL = '/api';
 
 let warehouses = [];
+let suppliers = [];
 let stockBatches = [];
 let allStockBatches = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     loadWarehouses();
+    loadSuppliers();
     loadStockBatches();
     loadTransfers();
     loadExpiringBatches();
@@ -60,6 +62,21 @@ function setupEventListeners() {
         e.preventDefault();
         await transferBatch();
     });
+
+    document.getElementById('editWarehouseForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await updateWarehouse();
+    });
+
+    document.getElementById('createSupplierForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await createSupplier();
+    });
+
+    document.getElementById('editSupplierForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await updateSupplier();
+    });
 }
 
 // Warehouse Management
@@ -86,6 +103,9 @@ function renderWarehouses() {
             <td>${wh.name}</td>
             <td>${typeBadge}</td>
             <td>${batchCount}</td>
+            <td>
+                <button class="btn-sm btn-secondary" onclick="openEditWarehouseModal(${wh.id})">Edit</button>
+            </td>
         `;
         tbody.appendChild(tr);
     });
@@ -127,6 +147,114 @@ async function createWarehouse() {
 
     closeModal('createWarehouseModal');
     document.getElementById('createWarehouseForm').reset();
+    loadWarehouses();
+}
+
+function openCreateWarehouseModal() {
+    document.getElementById('createWarehouseModal').style.display = 'block';
+}
+
+// Supplier Management
+async function loadSuppliers() {
+    const res = await fetch(`${API_URL}/suppliers`);
+    suppliers = await res.json();
+    renderSuppliers();
+}
+
+function renderSuppliers() {
+    const tbody = document.getElementById('supplierList');
+    tbody.innerHTML = '';
+
+    suppliers.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${s.id}</td>
+            <td>${s.name}</td>
+            <td>${s.contact}</td>
+            <td>${s.phone}</td>
+            <td>${s.address}</td>
+            <td>
+                <button class="btn-sm btn-secondary" onclick="openEditSupplierModal(${s.id})">Edit</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+async function createSupplier() {
+    const name = document.getElementById('supplierName').value;
+    const contact = document.getElementById('supplierContact').value;
+    const phone = document.getElementById('supplierPhone').value;
+    const address = document.getElementById('supplierAddress').value;
+
+    await fetch(`${API_URL}/suppliers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, contact, phone, address })
+    });
+
+    closeModal('createSupplierModal');
+    document.getElementById('createSupplierForm').reset();
+    loadSuppliers();
+}
+
+function openEditSupplierModal(id) {
+    const supplier = suppliers.find(s => s.id === id);
+    if (!supplier) return;
+
+    document.getElementById('editSupplierId').value = supplier.id;
+    document.getElementById('editSupplierName').value = supplier.name;
+    document.getElementById('editSupplierContact').value = supplier.contact;
+    document.getElementById('editSupplierPhone').value = supplier.phone;
+    document.getElementById('editSupplierAddress').value = supplier.address;
+
+    document.getElementById('editSupplierModal').style.display = 'block';
+}
+
+async function updateSupplier() {
+    const id = document.getElementById('editSupplierId').value;
+    const name = document.getElementById('editSupplierName').value;
+    const contact = document.getElementById('editSupplierContact').value;
+    const phone = document.getElementById('editSupplierPhone').value;
+    const address = document.getElementById('editSupplierAddress').value;
+
+    await fetch(`${API_URL}/suppliers/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, contact, phone, address })
+    });
+
+    closeModal('editSupplierModal');
+    loadSuppliers();
+}
+
+function openCreateSupplierModal() {
+    document.getElementById('createSupplierModal').style.display = 'block';
+}
+
+function openEditWarehouseModal(id) {
+    const warehouse = warehouses.find(w => w.id === id);
+    if (!warehouse) return;
+
+    document.getElementById('editWarehouseId').value = warehouse.id;
+    document.getElementById('editWarehouseName').value = warehouse.name;
+    document.getElementById('editWarehouseType').value = warehouse.warehouse_type;
+
+    document.getElementById('editWarehouseModal').style.display = 'block';
+}
+
+async function updateWarehouse() {
+    const id = document.getElementById('editWarehouseId').value;
+    const name = document.getElementById('editWarehouseName').value;
+    const warehouse_type = document.getElementById('editWarehouseType').value;
+
+    await fetch(`${API_URL}/warehouses/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, warehouse_type })
+    });
+
+    closeModal('editWarehouseModal');
     loadWarehouses();
 }
 

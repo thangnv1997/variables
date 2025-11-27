@@ -67,6 +67,15 @@ pub struct InternalTransfer {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Supplier {
+    pub id: u32,
+    pub name: String,
+    pub contact: String,
+    pub phone: String,
+    pub address: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Pharmacy {
     pub inventory: Vec<Medicine>, // Deprecated, kept for compatibility
     pub warehouses: Vec<Warehouse>,
@@ -74,6 +83,7 @@ pub struct Pharmacy {
     pub import_log: Vec<ImportBatch>,
     pub export_log: Vec<ExportBatch>,
     pub transfer_log: Vec<InternalTransfer>,
+    pub suppliers: Vec<Supplier>,
 }
 
 impl Pharmacy {
@@ -85,6 +95,7 @@ impl Pharmacy {
             import_log: Vec::new(),
             export_log: Vec::new(),
             transfer_log: Vec::new(),
+            suppliers: Vec::new(),
         }
     }
 
@@ -185,6 +196,48 @@ impl Pharmacy {
             Ok(())
         } else {
             Err("Warehouse not found".to_string())
+        }
+    }
+
+    pub fn add_supplier(
+        &mut self,
+        name: String,
+        contact: String,
+        phone: String,
+        address: String,
+    ) -> u32 {
+        let id = if let Some(last) = self.suppliers.last() {
+            last.id + 1
+        } else {
+            1
+        };
+        let supplier = Supplier {
+            id,
+            name,
+            contact,
+            phone,
+            address,
+        };
+        self.suppliers.push(supplier);
+        id
+    }
+
+    pub fn edit_supplier(
+        &mut self,
+        id: u32,
+        name: String,
+        contact: String,
+        phone: String,
+        address: String,
+    ) -> Result<(), String> {
+        if let Some(supplier) = self.suppliers.iter_mut().find(|s| s.id == id) {
+            supplier.name = name;
+            supplier.contact = contact;
+            supplier.phone = phone;
+            supplier.address = address;
+            Ok(())
+        } else {
+            Err("Supplier not found".to_string())
         }
     }
 

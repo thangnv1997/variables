@@ -10,8 +10,8 @@ use axum::{
 };
 use chrono::{DateTime, Local};
 use models::{
-    ExportBatch, ImportBatch, InternalTransfer, Medicine, Pharmacy, StockBatch, Warehouse,
-    WarehouseType,
+    ExportBatch, ImportBatch, InternalTransfer, Medicine, Pharmacy, StockBatch, Supplier,
+    Warehouse, WarehouseType,
 };
 use serde::Deserialize;
 use std::{
@@ -43,12 +43,15 @@ async fn main() {
             "/api/warehouses",
             get(list_warehouses).post(create_warehouse),
         )
-        .route("/api/warehouses/:id", put(edit_warehouse))
+        .route("/api/warehouses/{id}", put(edit_warehouse))
         .route("/api/stock-batches", get(list_stock_batches))
         .route("/api/import-batch", post(import_batch_handler))
         .route("/api/transfer-batch", post(transfer_batch_handler))
         .route("/api/expiring-batches", get(get_expiring_batches))
         .route("/api/transfers", get(get_transfers))
+        // Supplier routes
+        .route("/api/suppliers", get(list_suppliers).post(create_supplier))
+        .route("/api/suppliers/{id}", put(edit_supplier))
         .nest_service("/assets", ServeDir::new("assets"))
         .route("/", get(index_handler))
         .with_state(state.clone());
@@ -249,6 +252,65 @@ async fn get_expiring_batches(State(state): State<AppState>) -> Json<Vec<StockBa
 async fn get_transfers(State(state): State<AppState>) -> Json<Vec<InternalTransfer>> {
     let pharmacy = state.lock().unwrap();
     Json(pharmacy.transfer_log.clone())
+}
+
+// Supplier handlers
+
+async fn list_suppliers(State(state): State<AppState>) -> Json<Vec<Supplier>> {
+    let pharmacy = state.lock().unwrap();
+    Json(pharmacy.suppliers.clone())
+}
+
+#[derive(Deserialize)]
+struct CreateSupplierRequest {
+    name: String,
+    contact: String,
+    phone: String,
+    address: String,
+}
+
+#[derive(Deserialize)]
+struct EditSupplierRequest {
+    name: String,
+    contact: String,
+    phone: String,
+    address: String,
+}
+
+async fn create_supplier(
+    State(state): State<AppState>,
+    Json(payload): Json<CreateSupplierRequest>,
+) -> impl IntoResponse {
+    let mut pharmacy = state.lock().unwrap();
+    let id = pharmacy.add_supplier(
+        payload.name,
+        payload.contact,
+        payload.phone,
+        payload.address,
+    );
+    save_data(&pharmacy);
+    (StatusCode::CREATED, Json(id))
+}
+
+async fn edit_supplier(
+    State(state): State<AppState>,
+    Path(id): Path<u32>,
+    Json(payload): Json<EditSupplierRequest>,
+) -> impl IntoResponse {
+    let mut pharmacy = state.lock().unwrap();
+    match pharmacy.edit_supplier(
+        id,
+        payload.name,
+        payload.contact,
+        payload.phone,
+        payload.address,
+    ) {
+        Ok(_) => {
+            save_data(&pharmacy);
+            StatusCode::OK.into_response()
+        }
+        Err(e) => (StatusCode::BAD_REQUEST, e).into_response(),
+    }
 }
 
 fn load_data() -> Pharmacy {

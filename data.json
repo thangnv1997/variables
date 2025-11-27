@@ -1,100 +1,17 @@
 {
   "inventory": [],
-  "warehouses": [
-    {
-      "id": 1,
-      "name": "kho chính",
-      "warehouse_type": "Main"
-    },
-    {
-      "id": 2,
-      "name": "nhà thuốc 1",
-      "warehouse_type": "Main"
-    }
-  ],
-  "stock_batches": [
-    {
-      "id": 1,
-      "medicine_id": 1,
-      "medicine_name": "paradol",
-      "warehouse_id": 1,
-      "quantity": 0,
-      "price": 1000.0,
-      "expiry_date": "2026-12-30T07:00:00+07:00",
-      "import_date": "2025-11-23T01:12:38.102120441+07:00"
-    },
-    {
-      "id": 2,
-      "medicine_id": 1,
-      "medicine_name": "paradol",
-      "warehouse_id": 1,
-      "quantity": 80,
-      "price": 1000.0,
-      "expiry_date": "2026-12-30T07:00:00+07:00",
-      "import_date": "2025-11-23T01:12:46.687363051+07:00"
-    },
-    {
-      "id": 3,
-      "medicine_id": 1,
-      "medicine_name": "paradol",
-      "warehouse_id": 1,
-      "quantity": 0,
-      "price": 1000.0,
-      "expiry_date": "2026-12-30T07:00:00+07:00",
-      "import_date": "2025-11-23T01:12:55.695761939+07:00"
-    },
-    {
-      "id": 4,
-      "medicine_id": 1,
-      "medicine_name": "paradol",
-      "warehouse_id": 2,
-      "quantity": 20,
-      "price": 1000.0,
-      "expiry_date": "2026-12-30T07:00:00+07:00",
-      "import_date": "2025-11-23T01:13:20.829192106+07:00"
-    }
-  ],
-  "import_log": [
-    {
-      "id": 1,
-      "medicine_id": 1,
-      "medicine_name": "paradol",
-      "quantity": 100,
-      "price": 1000.0,
-      "timestamp": "2025-11-23T01:12:38.102121841+07:00"
-    }
-  ],
+  "warehouses": [],
+  "stock_batches": [],
+  "import_log": [],
   "export_log": [],
-  "transfer_log": [
+  "transfer_log": [],
+  "suppliers": [
     {
       "id": 1,
-      "medicine_id": 1,
-      "medicine_name": "paradol",
-      "from_warehouse_id": 1,
-      "to_warehouse_id": 1,
-      "quantity": 100,
-      "batch_id": 1,
-      "timestamp": "2025-11-23T01:12:46.687428950+07:00"
-    },
-    {
-      "id": 2,
-      "medicine_id": 1,
-      "medicine_name": "paradol",
-      "from_warehouse_id": 1,
-      "to_warehouse_id": 1,
-      "quantity": 20,
-      "batch_id": 2,
-      "timestamp": "2025-11-23T01:12:55.695785139+07:00"
-    },
-    {
-      "id": 3,
-      "medicine_id": 1,
-      "medicine_name": "paradol",
-      "from_warehouse_id": 1,
-      "to_warehouse_id": 2,
-      "quantity": 20,
-      "batch_id": 3,
-      "timestamp": "2025-11-23T01:13:20.829214506+07:00"
+      "name": "cpc2",
+      "contact": "Nguyễn Văn Thắng",
+      "phone": "0354956266",
+      "address": "xóm Thanh Hùng, xã Giao Thanh, Giao Thuỷ, Nam Định"
     }
   ]
 }
