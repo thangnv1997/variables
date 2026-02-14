@@ -166,22 +166,6 @@ impl Pharmacy {
         }
     }
 
-    pub fn list_medicines(&self) {
-        // CLI method, keeping it for compatibility or debugging
-        println!(
-            "{:<5} | {:<20} | {:<15} | {:<10}",
-            "ID", "Name", "Price", "Quantity"
-        );
-        println!("{}", "-".repeat(60));
-        for med in &self.inventory {
-            let price_str = format!("{:.2}", med.price).replace('.', ",");
-            println!(
-                "{:<5} | {:<20} | {:<15} | {:<10}",
-                med.id, med.name, price_str, med.quantity
-            );
-        }
-    }
-
     // Warehouse Management Methods
 
     pub fn edit_warehouse(
@@ -369,6 +353,7 @@ impl Pharmacy {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub fn sell_with_fefo(&mut self, medicine_id: u32, quantity: u32) -> Result<(), String> {
         // Find store warehouse
         let store_warehouse = self
@@ -439,6 +424,7 @@ impl Pharmacy {
             .collect()
     }
 
+    #[allow(dead_code)]
     pub fn get_stock_by_warehouse(&self, warehouse_id: u32) -> Vec<StockBatch> {
         self.stock_batches
             .iter()
